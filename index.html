@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SplitMoney-BudgetVersion</title>
+    <link rel="icon" href="images/logo.webp">
+    <script src="index.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="m-8">
+    <button class="rounded-md bg-red-200 px-2 my-8" onclick="clearAll()">Clear All</button>
+    <section>
+        <h1 class="text-2xl font-bold mb-2">Add People</h1>
+
+        <div>
+            <label for="fname">Name:</label>
+            <input class="border-2 border-solid border-black mr-2" type="text" id="name" name="fname"><br><br>
+            <button class="rounded-md bg-blue-100 px-2" onclick="addName()">Add</button>
+        </div>
+        <div id="names-list-text">
+        </div>
+    </section>
+
+    <section>
+        <h1 class="text-2xl font-bold mt-6 mb-2">Add Items and Cost</h1>
+        <div>
+            <div class="flex mb-2">
+                <label for="foptsname">Name:</label>
+                <select name="foptsname" id="opts-name">
+                </select>
+            </div>
+            <label for="fitem">Item:</label>
+            <input class="border-2 border-black mr-2" type="text" id="item" name="fitem"><br><br>
+            <label for="fcost">Cost Paid (Number):</label>
+            <input class="border-2 border-black mr-2" type="number" id="cost" name="fcost"><br><br>
+            <button class="rounded-md bg-blue-100 px-2" onclick="addItemsAndCost()">Add Entry</button>
+        </div>
+    </section>
+
+    <section class="mt-6">
+        <h1 class="text-2xl font-bold">Calculation</h1>
+
+        <h2 class="text-xl font-bold mt-6 mb-2">Logs</h1>
+        <table class="table-auto">
+            <tbody id="logs">
+                <tr>
+                    <th>Name</th>
+                    <th>Item</th>
+                    <th>Cost</th>
+                    <th>Total</th>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 class="text-xl font-bold mt-6">Summary</h1>
+        <table class="table-auto">
+            <tr>
+                <th>Name</th>
+                <th>Item</th>
+                <th>Cost</th>
+                <th>Total</th>
+            </tr>
+            <tr>
+                <td></td>
+            </tr>
+        </table>
+
+    </section>
+</body>
+</html>
