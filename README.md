@@ -15,10 +15,8 @@ todo:
 
 - might need to fix the id thingy
 
-OWE - minus
-PAY - plus
 
-many to many r/s :
-P1 - 2, 3, 4
-P2 - 1, 3, 4
-
+- need to create a 'contra' feature to net off the pay and receive
+- need to handle overpayment ?
+- who paid who feature not done
+- who owe who summary under who paid for items - logs not rendered
