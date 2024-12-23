@@ -8,6 +8,7 @@ function renderNamesInUi() {
     let names = JSON.parse(getFromLocalStorage(NAMES_KEY))
     renderListOfNames(names)
     renderDropdownOptions(names)
+    renderListOfWhoToSplitWith(names)
 }
 
 function renderListOfNames(names) {
@@ -27,14 +28,19 @@ function renderListOfWhoToSplitWith(names) {
 }
 
 function renderDropdownOptions(names) {
-    var dropdownList = document.getElementById('opts-who-paid')
-    dropdownList.innerHTML = ''
+    var whoPaidDropdown = document.getElementById('opts-who-paid')
+    var personPayingDropdown = document.getElementById('opts-person-paying')
+    var personReceivingDropdown = document.getElementById('opts-person-receiving')
+    whoPaidDropdown.innerHTML = ''
+    personPayingDropdown.innerHTML = ''
+    personReceivingDropdown.innerHTML = ''
     for (let i = 0; i < names.length; i++) {
-        console.log(names[i])
         var option = document.createElement('option')
         option.value = names[i]
         option.text = names[i]
-        dropdownList.appendChild(option)
+        whoPaidDropdown.appendChild(option)
+        personPayingDropdown.appendChild(option.cloneNode(true))
+        personReceivingDropdown.appendChild(option.cloneNode(true))
     }
 }
 

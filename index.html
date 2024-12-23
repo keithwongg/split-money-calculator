@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SplitMoney-BudgetVersion</title>
     <link rel="icon" href="images/logo.webp">
+    <link rel="stylesheet" href="index.css">
     <script src="scripts/index.js"></script>
     <script src="scripts/utils.js"></script>
     <script src="scripts/rendering.js"></script>
@@ -16,10 +17,13 @@
         <h1 class="text-2xl font-bold mb-2">Simple Split</h1>
         <p>Simple Split is a simple one page calculator to split bills with people.</p>
         <p>Data is stored solely in local storage on the browser and nowhere else.</p>
-        <p>Click on the "Clear All" button to reset all data.</p>
+        <br>
+        <p>Click on the button below to clear all data:</p>
+        <button class="rounded-md bg-red-200 px-2 mt-2" onclick="clearAll()">Clear All Data and Restart</button>
     </section>
 
-    <button class="rounded-md bg-red-200 px-2 my-8" onclick="clearAll()">Clear All</button>
+    <div class="split-border"></div>
+
     <section>
         <h1 class="text-2xl font-bold mb-2">People Involved</h1>
 
@@ -32,8 +36,10 @@
         </div>
     </section>
 
+    <div class="split-border"></div>
+
     <section>
-        <h1 class="text-2xl font-bold mt-6 mb-2">Who Paid For Items?</h1>
+        <h1 class="text-2xl font-bold mb-2">Who Paid For Items?</h1>
         <div>
             <div class="flex mb-2">
                 <label for="foptsname">Select Name:</label>
@@ -68,17 +74,19 @@
         </div>
     </section>
 
+    <div class="split-border"></div>
+
     <section>
-        <h1 class="text-2xl font-bold mt-6 mb-2">Who Paid Who?</h1>
+        <h1 class="text-2xl font-bold mb-2">Who Paid Who?</h1>
         <div>
             <div class="flex mb-2">
                 <label for="fpay">Person Paying:</label>
-                <select name="fpay" id="name-paying">
+                <select name="fpay" id="opts-person-paying">
                 </select>
             </div>
             <div class="flex mb-2">
                 <label for="freceive">Person Receiving:</label>
-                <select name="freceive" id="name-receiving">
+                <select name="freceive" id="opts-person-receiving">
                 </select>
             </div>
             <label for="fwpwcost">$$ Paid:</label>
