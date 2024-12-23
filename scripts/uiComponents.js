@@ -45,8 +45,17 @@ function delButtonForWhoToSplitWith(content) {
 function delButtonForItemLogs(id) {
     let del = createDelButton()
     del.onclick = function () {
-        removeItem(id)
+        removeItemFromStorageById(id, ITEMS_KEY)
         renderLogsInUi()
+    }
+    return del
+}
+
+function delButtonForP2PLogs(id) {
+    let del = createDelButton()
+    del.onclick = function () {
+        removeItemFromStorageById(id, P2P_KEY)
+        renderP2PLogsInUi()
     }
     return del
 }

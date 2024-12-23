@@ -80,6 +80,38 @@ function renderLogsInUi() {
     }
 }
 
+function renderP2PLogsInUi() {
+    if (getFromLocalStorage(P2P_KEY) === undefined) {
+        return
+    }
+    let items = JSON.parse(getFromLocalStorage(P2P_KEY))
+    sortItemsById(items)
+
+    let table = document.getElementById('p2p-trf')
+    table.innerHTML = ''
+    for(let i = 0; i < items.length; i++) {
+        let entryRow = document.createElement('tr')
+        entryRow.value = i
+
+        let payee = document.createElement('td')
+        payee.innerText = items[i].payee
+        entryRow.appendChild(payee)
+
+        let recipient = document.createElement('td')
+        recipient.innerText = items[i].recipient
+        entryRow.appendChild(recipient)
+
+        let cost = document.createElement('td')
+        cost.innerText = items[i].cost
+        entryRow.appendChild(cost)
+
+        let delButton = delButtonForP2PLogs(items[i].id)
+        entryRow.appendChild(delButton)
+
+        table.appendChild(entryRow)
+    }
+}
+
 function sortItemsById(items) {
     items.sort(function(a, b) {
         return (a.id < b.id)
@@ -96,4 +128,12 @@ function sortItemsByWhoPaid(items) {
         }
         return 0
     })
+}
+
+function showErrorForSeconds(domId, seconds){
+    let alert = document.getElementById(domId)
+    alert.classList.remove('hidden')
+    setTimeout(() => {
+        alert.classList.add('hidden')
+    }, (seconds * 1000))
 }

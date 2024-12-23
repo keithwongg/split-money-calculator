@@ -13,5 +13,3 @@ todo:
 - if delete people involved, all data related to the person will have to be removed.
  -> need to show pop-up notification + design that.
 
-- if person is selected, it should not be included in the person to be split with => doesn't make sense.
-
