@@ -1,6 +1,6 @@
 const NAMES_KEY = "names";
 const ITEMS_KEY = "items";
-const BALANCE_KEY = "balance";
+const BALANCE_KEY = "balance"; // this is the oweing balance
 const P2P_KEY = "p2p";
 
 /*
@@ -21,21 +21,36 @@ p2p: [{
     cost: "10"
 }]
 
-// this one should be calculated
-balance: [{
+figure represents oweing
+owe_balance: [{
     "person 1" : {
-        "person 2": 30,
-        "person 2": 20
+        "person 2": 0,
+        "person 3": 0
+    },
+    "person 2" : {
+        "person 1": 30,
+        "person 4": 0
     }
-    to_receive: 50
 }]
+
+counter: 0
+person 1 - person 2: 0
+person 2 - person 1: -3)
+
+how to know balance of person 1:
+store person1's data that he owe to ppl:
+for each person that is not person1 data, owe to person 1, + $$ to person1 r/s
+
+final result as shown for person1
 */
 
 window.onload = function (e) {
     renderNamesInUi()
+    createBalanceObj()
+    calculateWhoOweWhoInBalance()
     renderLogsInUi()
     renderP2PLogsInUi()
-    // render balance in ui??
+    renderSummary()
 }
 
 function addName() {
@@ -46,6 +61,7 @@ function addName() {
     saveName(name.value)
     renderNamesInUi()
     name.value = ''
+    createBalanceObj()
 }
 
 /*
@@ -94,30 +110,23 @@ function addWhoPaidForItemsLog() {
     let cost = document.getElementById('item-cost')
     let names = getWhoToSplitNamesFromUi()
 
-    let itemsArr = getFromLocalStorage(ITEMS_KEY)
-    if (itemsArr === undefined) {
-        itemsArr = []
-    } else {
-        itemsArr = JSON.parse(itemsArr)
-    }
+    let itemsArr = getFromLocalStorageAsArray(ITEMS_KEY)
     let item = {
         id: itemsArr.length + 1,
         description: description.value,
         cost: cost.value,
+        cost_per_pax: roundToTwoDp(cost.value/names.length),
         who_paid: whoPaid.value,
         to_receive_from: names
     }
     itemsArr.push(item)
 
     saveInLocalStorage(ITEMS_KEY, itemsArr)
-    saveInLocalStorage(BALANCE_KEY, itemsArr)
 
-    // render logs in UI
+    createBalanceObj()
+    calculateWhoOweWhoInBalance()
+
     renderLogsInUi()
-
-    // tally balance
-    // tallyBalance()
-
 }
 
 function getWhoToSplitNamesFromUi() {
@@ -145,33 +154,56 @@ function removeItemFromStorageById(id, key) {
     return itemsArray
 }
 
-function tallyBalance() {
-    // calculationlogic
-    if (getFromLocalStorage(BALANCE_KEY) === undefined) {
-        return
-    }
-    let items = JSON.parse(getFromLocalStorage(BALANCE_KEY))
-    let dictBalance = {}
-    for (let i = 0; i < items.length; i++) {
-        if (dictBalance[items.who_paid] === undefined) {
-            dictBalance[items.who_paid] = {
-                to_receive: items.cost,
-                to_receive_from: items.to_receive_from
-            }
-        } else {
-            dictBalance[items.who_paid] += items.cost
+/*
+    Who Owe Who?
+*/
+function calculateWhoOweWhoInBalance() {
+    let itemsArr = getFromLocalStorageAsArray(ITEMS_KEY)
+    let balanceArr = getFromLocalStorageAsArray(BALANCE_KEY)
+
+    for(let i = 0; i < itemsArr.length; i++) {
+        let personToReceive = itemsArr[i].who_paid
+        let peopleWhoOwe = itemsArr[i].to_receive_from
+        // console.log(`people: ${personToReceive} ${peopleWhoOwe}`)
+
+        // for every person who owe, search for the balance arr, 
+        // find the r/s then add the amount
+        for (let j = 0; j < peopleWhoOwe.length; j++) {
+            balanceArr.forEach((bal) => {
+                let valueExist = bal[peopleWhoOwe[j]]
+                let oweAndPayNotTheSamePerson = personToReceive !== peopleWhoOwe[j]
+                if (valueExist && oweAndPayNotTheSamePerson) {
+                    bal[peopleWhoOwe[j]][personToReceive] += itemsArr[i].cost_per_pax
+                }
+                // console.log(`${JSON.stringify(bal)}`)
+            })
         }
     }
-    // render in UI
-    let balanceDiv = document.getElementById('balance-description')
-    dictBalance.forEach((key, value) => {
-        console.log(`moneeky: key ${key} value ${value}`)
-    })
+
+    saveInLocalStorage(BALANCE_KEY, balanceArr)
 }
 
+// establish the Payee Recipient Relationship
+function createBalanceObj() {
+    let namesArr = getFromLocalStorageAsArray(NAMES_KEY)
+    let overall = []
+    for(let i = 0; i < namesArr.length; i++) {
+        let pMap = {}
+        for(let j = 0; j < namesArr.length; j++) {
+            if (namesArr[j] === namesArr[i]) {
+                continue
+            }
+            pMap[namesArr[j]] = 0
+        }
+        let obj = {}
+        obj[namesArr[i]] = pMap
+        overall.push(obj)
+    }
+    saveInLocalStorage(BALANCE_KEY, overall)
+}
 
 /*
-    Who Pay Who Add Log
+    Who Paid Who?
 */
 function whoPayWhoAddLog() {
     let payee = document.getElementById('opts-person-paying')
@@ -183,12 +215,7 @@ function whoPayWhoAddLog() {
         return
     }
 
-    let p2pData = getFromLocalStorage(P2P_KEY)
-    if (p2pData === undefined) {
-        p2pData = []
-    } else {
-        p2pData = JSON.parse(p2pData)
-    }
+    let p2pData = getFromLocalStorageAsArray(P2P_KEY)
     let item = {
         id: p2pData.length + 1,
         payee: payee.value,
@@ -199,11 +226,52 @@ function whoPayWhoAddLog() {
 
     saveInLocalStorage(P2P_KEY, p2pData)
 
-    // render logs in UI
     renderP2PLogsInUi()
 
-    // tally balance
-    // tallyBalance()
+    renderSummary()
+}
 
+function renderSummary() {
+    let namesArr = getFromLocalStorageAsArray(NAMES_KEY)
+    let balanceArr = getFromLocalStorageAsArray(BALANCE_KEY)
+    let pTagsToAdd = []
 
+    for (let i = 0; i < namesArr.length; i++) {
+        // iterate through all the balances and get all the data
+        let personToFocusOn = namesArr[i]
+        // console.log(`persontofocuson: ${personToFocusOn}`)
+        for (let j = 0; j < balanceArr.length; j++) {
+            if (balanceArr[j][personToFocusOn]) {
+                let owingToPeople = balanceArr[j][personToFocusOn]
+                // console.log(`monkeyowing: ${JSON.stringify(owingToPeople)}`)
+
+                // show owing money
+                for (const [key, value] of Object.entries(owingToPeople)) {
+                    if (value !== 0) {
+                        pTagsToAdd.push(createPTag(`${personToFocusOn} Owes ${key} $${value}`))
+                    }
+                }
+            }
+        }
+    }
+
+    if (pTagsToAdd.length <= 0) {
+        addPTagsToSummary([createPTag("All Settled Up! No Balance Remaining")])
+    } else {
+        addPTagsToSummary(pTagsToAdd)
+    }
+}
+
+function createPTag(text) {
+    let pTag = document.createElement('p')
+    pTag.innerText = text
+    return pTag
+}
+
+function addPTagsToSummary(pTags) {
+    let summary = document.getElementById('balance-description')
+    summary.innerHTML = ''
+    for(let i = 0; i < pTags.length; i++) {
+        summary.appendChild(pTags[i])
+    }
 }

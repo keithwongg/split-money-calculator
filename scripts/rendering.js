@@ -69,6 +69,10 @@ function renderLogsInUi() {
         cost.innerText = items[i].cost
         entryRow.appendChild(cost)
 
+        let costPerPax = document.createElement('td')
+        costPerPax.innerText = items[i].cost_per_pax
+        entryRow.appendChild(costPerPax)
+
         let splitWith = document.createElement('td')
         splitWith.innerText = items[i].to_receive_from
         entryRow.appendChild(splitWith)
@@ -78,6 +82,43 @@ function renderLogsInUi() {
 
         table.appendChild(entryRow)
     }
+}
+
+function renderWhoOweWhoLogsInUi() {
+    if (getFromLocalStorage(ITEMS_KEY) === undefined) {
+        return
+    }
+    let items = JSON.parse(getFromLocalStorage(ITEMS_KEY))
+    sortItemsById(items)
+
+    let table = document.getElementById('who-owe-who')
+    table.innerHTML = ''
+    for(let i = 0; i < items.length; i++) {
+        let entryRow = document.createElement('tr')
+        entryRow.value = i
+
+        let whoPaid = document.createElement('td')
+        whoPaid.innerText = items[i].who_paid
+        entryRow.appendChild(whoPaid)
+
+        let itemDescription = document.createElement('td')
+        itemDescription.innerText = items[i].description
+        entryRow.appendChild(itemDescription)
+
+        let cost = document.createElement('td')
+        cost.innerText = items[i].cost
+        entryRow.appendChild(cost)
+
+        let splitWith = document.createElement('td')
+        splitWith.innerText = items[i].to_receive_from
+        entryRow.appendChild(splitWith)
+
+        let delButton = delButtonForItemLogs(items[i].id)
+        entryRow.appendChild(delButton)
+
+        table.appendChild(entryRow)
+    }
+
 }
 
 function renderP2PLogsInUi() {

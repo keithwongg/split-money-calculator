@@ -13,3 +13,12 @@ todo:
 - if delete people involved, all data related to the person will have to be removed.
  -> need to show pop-up notification + design that.
 
+- might need to fix the id thingy
+
+OWE - minus
+PAY - plus
+
+many to many r/s :
+P1 - 2, 3, 4
+P2 - 1, 3, 4
+
