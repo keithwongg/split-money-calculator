@@ -5,10 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SplitMoney-BudgetVersion</title>
     <link rel="icon" href="images/logo.webp">
-    <script src="index.js"></script>
+    <script src="scripts/index.js"></script>
+    <script src="scripts/utils.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="m-8">
+    <section>
+        <h1 class="text-2xl font-bold mb-2">Simple Split</h1>
+        <p>Simple Split is a simple one page calculator to split bills with people.</p>
+        <p>Data is stored solely in local storage on the browser and nowhere else.</p>
+        <p>Click on the "Clear All" button to reset all data.</p>
+    </section>
+
     <button class="rounded-md bg-red-200 px-2 my-8" onclick="clearAll()">Clear All</button>
     <section>
         <h1 class="text-2xl font-bold mb-2">People Involved</h1>
@@ -23,51 +31,63 @@
     </section>
 
     <section>
-        <h1 class="text-2xl font-bold mt-6 mb-2">Who Paid For Items</h1>
+        <h1 class="text-2xl font-bold mt-6 mb-2">Who Paid For Items?</h1>
         <div>
             <div class="flex mb-2">
                 <label for="foptsname">Select Name:</label>
-                <select name="foptsname" id="opts-name">
+                <select name="foptsname" id="opts-who-paid">
                 </select>
             </div>
             <label for="fitem">Item Description:</label>
-            <input class="border-2 border-black mr-2 px-2" type="text" id="item" name="fitem"><br><br>
+            <input class="border-2 border-black mr-2 px-2" type="text" id="item-description" name="fitem"><br><br>
             <label for="fcost">$$ Paid:</label>
-            <input class="border-2 border-black mr-2 px-2" type="number" id="cost" name="fcost"><br><br>
-            <button class="rounded-md bg-blue-100 px-2 mb-6" onclick="addItemsAndCost()">Add Entry</button>
+            <input class="border-2 border-black mr-2 px-2" type="number" id="item-cost" name="fcost"><br><br>
+            <label>Who to split with:</label>
+            <button class="rounded-md bg-indigo-100 px-2" onclick="splitWithAll()">Click To Load All Names</button><br><br>
+            <div id="inputSplitWith"></div>
+            <button class="rounded-md bg-blue-100 px-2 mt-6" onclick="addWhoPaidForItemsLog()">Add Log Entry</button>
+        </div>
+
+        <div>
+            <table>
+                <tbody>
+                    <tr>
+                        <th>Who Paid?</th>
+                        <th>Item</th>
+                        <th>Cost</th>
+                        <th>Who To Split With?</th>
+                    </tr>
+                </tbody>
+                <tbody id="log-items">
+                </tbody>
+            </table>
+
         </div>
     </section>
 
     <section>
-        <h1 class="text-2xl font-bold mt-6 mb-2">Who Paid Who</h1>
+        <h1 class="text-2xl font-bold mt-6 mb-2">Who Paid Who?</h1>
         <div>
             <div class="flex mb-2">
-                <label for="foptsname">Select Name:</label>
-                <select name="foptsname" id="opts-name">
+                <label for="fpay">Person Paying:</label>
+                <select name="fpay" id="name-paying">
                 </select>
             </div>
-            <label for="fitem">Item Description:</label>
-            <input class="border-2 border-black mr-2 px-2" type="text" id="item" name="fitem"><br><br>
-            <label for="fcost">$$ Paid (2dp please):</label>
-            <input class="border-2 border-black mr-2 px-2" type="number" id="cost" name="fcost"><br><br>
-            <button class="rounded-md bg-blue-100 px-2" onclick="addItemsAndCost()">Add Entry</button>
+            <div class="flex mb-2">
+                <label for="freceive">Person Receiving:</label>
+                <select name="freceive" id="name-receiving">
+                </select>
+            </div>
+            <label for="fwpwcost">$$ Paid:</label>
+            <input class="border-2 border-black mr-2 px-2" type="number" id="who-pay-who-cost" name="fwpwcost"><br><br>
+            <button class="rounded-md bg-blue-100 px-2" onclick="whoPayWhoAddLog()">Add Log Entry</button>
         </div>
     </section>
 
     <section class="mt-6">
-        <h1 class="text-2xl font-bold">Calculation</h1>
+        <h1 class="text-2xl font-bold">Balance</h1>
 
-        <h2 class="text-xl font-bold mt-6 mb-2">Logs</h1>
-        <table class="table-auto">
-            <tbody id="logs">
-                <tr>
-                    <th>Name</th>
-                    <th>Item</th>
-                    <th>Cost</th>
-                    <th>Total</th>
-                </tr>
-            </tbody>
-        </table>
+        <div id="balance-description"></div>
 
 
     </section>
