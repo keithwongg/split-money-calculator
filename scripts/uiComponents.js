@@ -13,10 +13,15 @@ function whoToSplitWithPillButtonCreate(content) {
     return pill
 }
 
-function delButtonForNamesList(content) {
+function createDelButton() {
     let del = document.createElement('button')
     del.innerHTML = 'X'
     del.classList.add('rounded-md', 'bg-red-100', 'px-2', 'ml-2')
+    return del
+}
+
+function delButtonForNamesList(content) {
+    let del = createDelButton()
     del.onclick = function () {
         removeName(content)
         renderNamesInUi()
@@ -25,9 +30,7 @@ function delButtonForNamesList(content) {
 }
 
 function delButtonForWhoToSplitWith(content) {
-    let del = document.createElement('button')
-    del.innerHTML = 'X'
-    del.classList.add('rounded-md', 'bg-red-100', 'px-2', 'ml-2')
+    let del = createDelButton()
     del.onclick = function () {
         let container = document.getElementById('inputSplitWith')
         container.childNodes.forEach((node) => {
@@ -35,6 +38,15 @@ function delButtonForWhoToSplitWith(content) {
                 node.remove()
             }
         })
+    }
+    return del
+}
+
+function delButtonForItemLogs(id) {
+    let del = createDelButton()
+    del.onclick = function () {
+        removeItem(id)
+        renderLogsInUi()
     }
     return del
 }

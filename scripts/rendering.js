@@ -43,12 +43,13 @@ function renderLogsInUi() {
         return
     }
     let items = JSON.parse(getFromLocalStorage(ITEMS_KEY))
-    sortItemsByWhoPaid(items)
+    sortItemsById(items)
 
     let table = document.getElementById('log-items')
     table.innerHTML = ''
     for(let i = 0; i < items.length; i++) {
         let entryRow = document.createElement('tr')
+        entryRow.value = i
 
         let whoPaid = document.createElement('td')
         whoPaid.innerText = items[i].who_paid
@@ -66,8 +67,17 @@ function renderLogsInUi() {
         splitWith.innerText = items[i].to_receive_from
         entryRow.appendChild(splitWith)
 
+        let delButton = delButtonForItemLogs(items[i].id)
+        entryRow.appendChild(delButton)
+
         table.appendChild(entryRow)
     }
+}
+
+function sortItemsById(items) {
+    items.sort(function(a, b) {
+        return (a.id < b.id)
+    })
 }
 
 function sortItemsByWhoPaid(items) {

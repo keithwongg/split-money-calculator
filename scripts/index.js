@@ -92,6 +92,7 @@ function addWhoPaidForItemsLog() {
         itemsArr = JSON.parse(itemsArr)
     }
     let item = {
+        id: itemsArr.length + 1,
         description: description.value,
         cost: cost.value,
         who_paid: whoPaid.value,
@@ -106,7 +107,7 @@ function addWhoPaidForItemsLog() {
     renderLogsInUi()
 
     // tally balance
-    tallyBalance()
+    // tallyBalance()
 
 }
 
@@ -118,6 +119,21 @@ function getWhoToSplitNamesFromUi() {
         names.push(name.value)
     })
     return names
+}
+
+function removeItem(id) {
+    let items = getFromLocalStorage(ITEMS_KEY)
+    if (items === undefined) {
+        return;
+    }
+    let itemsArray = JSON.parse(items)
+    for (let i = 0; i < itemsArray.length; i++) {
+        if (itemsArray[i].id === id) {
+            itemsArray.splice(i, 1)
+        }
+    }
+    saveInLocalStorage(ITEMS_KEY, itemsArray)
+    return itemsArray
 }
 
 function tallyBalance() {
@@ -143,3 +159,4 @@ function tallyBalance() {
         console.log(`moneeky: key ${key} value ${value}`)
     })
 }
+
