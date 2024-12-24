@@ -12,11 +12,13 @@ function renderNamesInUi() {
 }
 
 function renderListOfNames(names) {
-    var listOfNames = document.getElementById('names-list-text')
+    let listOfNames = document.getElementById('names-list-text')
     listOfNames.innerHTML = ''
     for(let i = 0; i < names.length; i++) {
         listOfNames.appendChild(namePillButtonCreate(names[i]))
     }
+    let count = document.getElementById('names-count')
+    count.innerText = `(${names.length})  `
 }
 
 function renderListOfWhoToSplitWith(names) {
@@ -51,36 +53,52 @@ function renderItemLogsInUi() {
     let items = JSON.parse(getFromLocalStorage(ITEMS_KEY))
     sortItemsById(items)
 
-    let table = document.getElementById('log-items')
-    table.innerHTML = ''
+    // let table = document.getElementById('log-items')
+    // table.innerHTML = ''
+    let cardContainer = document.getElementById('logs-card-container')
+    cardContainer.innerHTML = ''
     for(let i = 0; i < items.length; i++) {
-        let entryRow = document.createElement('tr')
-        entryRow.value = i
+        let cardHtml = `
+        <div class="p-2 flex items-center justify-between w-full h-full border-2 border-black rounded-md shadow-sm bg-slate-50">
+            <div class="flex-col flex-wrap">
+                <div>${items[i].who_paid} paid for ${items[i].description}</div>
+                <div>Total Cost: $${items[i].cost}</div>
+                <div>Cost Per Pax: $${items[i].cost_per_pax}</div>
+                <div>Split Between: ${items[i].to_receive_from}</div>
+            </div>
+            ${delButtonForItemLogs(items[i].id).outerHTML}
+        </div>
+        `
 
-        let whoPaid = document.createElement('td')
-        whoPaid.innerText = items[i].who_paid
-        entryRow.appendChild(whoPaid)
+        // let entryRow = document.createElement('tr')
+        // entryRow.value = i
 
-        let itemDescription = document.createElement('td')
-        itemDescription.innerText = items[i].description
-        entryRow.appendChild(itemDescription)
+        // let whoPaid = document.createElement('td')
+        // whoPaid.innerText = items[i].who_paid
+        // entryRow.appendChild(whoPaid)
 
-        let cost = document.createElement('td')
-        cost.innerText = items[i].cost
-        entryRow.appendChild(cost)
+        // let itemDescription = document.createElement('td')
+        // itemDescription.innerText = items[i].description
+        // entryRow.appendChild(itemDescription)
 
-        let costPerPax = document.createElement('td')
-        costPerPax.innerText = items[i].cost_per_pax
-        entryRow.appendChild(costPerPax)
+        // let cost = document.createElement('td')
+        // cost.innerText = items[i].cost
+        // entryRow.appendChild(cost)
 
-        let splitWith = document.createElement('td')
-        splitWith.innerText = items[i].to_receive_from
-        entryRow.appendChild(splitWith)
+        // let costPerPax = document.createElement('td')
+        // costPerPax.innerText = items[i].cost_per_pax
+        // entryRow.appendChild(costPerPax)
 
-        let delButton = delButtonForItemLogs(items[i].id)
-        entryRow.appendChild(delButton)
+        // let splitWith = document.createElement('td')
+        // splitWith.innerText = items[i].to_receive_from
+        // entryRow.appendChild(splitWith)
 
-        table.appendChild(entryRow)
+        // let delButton = delButtonForItemLogs(items[i].id)
+        // entryRow.appendChild(delButton)
+
+        // table.appendChild(entryRow)
+
+        cardContainer.innerHTML += cardHtml
     }
 }
 
@@ -89,7 +107,7 @@ function renderP2PLogsInUi() {
         return
     }
     let items = JSON.parse(getFromLocalStorage(P2P_KEY))
-    sortItemsById(items)
+    // sortItemsById(items)
 
     let table = document.getElementById('p2p-trf')
     table.innerHTML = ''
@@ -127,9 +145,16 @@ function renderSummary() {
     let adjMatrix = getFromLocalStorageAsArray(ADJMATRIX_KEY)
     let pTagsToAdd = []
 
+    let incompleteProgress = itemsLength === 0 ||
+        p2pLength === 0 ||
+        namesArr.length === 0 ||
+        adjMatrix.length === 0
+
     let settledUpDict = {}
     for (let i = 0; i < namesArr.length; i++) {
-        settledUpDict[namesArr[i]] = 1 // default to false
+        settledUpDict[namesArr[i]] = (incompleteProgress) ? 0 : 1 // default to false
+        let br = document.createElement('br')
+        pTagsToAdd.push(br)
         for (let j = 0; j < namesArr.length; j++) {
             if (i === j) { // avoid if same person
                 continue
@@ -146,7 +171,6 @@ function renderSummary() {
                 - | owe +, receive - | owe -, receive -|
             */
             if (owingValue === receivingValue) {
-                settledUpDict[namesArr[i]] = 1
                 continue
             }
             settledUpDict[namesArr[i]] = 0
@@ -185,18 +209,6 @@ function renderSummary() {
                 }
                 continue
             }
-
-            // if (owingValue < 0) {
-            //     settledUpDict[namesArr[i]] = 0
-            //     pTagsToAdd.push(createPTag(`${namesArr[i]} overpaid $${formatToShow2dpInUi(Math.abs(owingValue))} to ${namesArr[j]}`))
-            // } else if (owingValue > receivingValue) {
-            //     settledUpDict[namesArr[i]] = 0
-            //     pTagsToAdd.push(createPTag(`${namesArr[i]} owes ${namesArr[j]} $${formatToShow2dpInUi(owingValue - receivingValue)}`))
-            // } else if (receivingValue > owingValue) {
-            //     settledUpDict[namesArr[i]] = 0
-            //     pTagsToAdd.push(createPTag(`${namesArr[i]} to receive $${formatToShow2dpInUi(receivingValue - owingValue)} from ${namesArr[j]}`))
-            // }
-            // // check for overpayment - i.e. -negative values
         }
     }
 
@@ -209,11 +221,6 @@ function renderSummary() {
             allSettledUp = false
         }
     }
-
-    let incompleteProgress = itemsLength === 0 ||
-        p2pLength === 0 ||
-        namesArr.length === 0 ||
-        adjMatrix.length === 0
 
     if (allSettledUp && !incompleteProgress) {
         addPTagsToSummary([createPTag("All Settled Up! No Balance Remaining")])
@@ -252,24 +259,6 @@ function showHappyCat(show) {
 /*
     Others
 */
-function sortItemsById(items) {
-    items.sort(function(a, b) {
-        return (a.id < b.id)
-    })
-}
-
-function sortItemsByWhoPaid(items) {
-    items.sort(function(a, b) {
-        if (a.who_paid < b.who_paid) {
-            return -1
-        }
-        if (a.who_paid > b.who_paid) {
-            return 1
-        }
-        return 0
-    })
-}
-
 function showErrorForSeconds(domId, seconds){
     let alert = document.getElementById(domId)
     alert.classList.remove('hidden')

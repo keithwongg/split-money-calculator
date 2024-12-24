@@ -54,3 +54,21 @@ function roundToTwoDp(num) {
 function formatToShow2dpInUi(num) {
     return roundToTwoDp(num).toLocaleString("en-US", {maximumFractionDigits: 2, minimumFractionDigits: 2})
 }
+
+function sortItemsById(items) {
+    items.sort(function(a, b) {
+        return (a.id < b.id)
+    })
+}
+
+function sortItemsByWhoPaid(items) {
+    items.sort(function(a, b) {
+        if (a.who_paid < b.who_paid) {
+            return -1
+        }
+        if (a.who_paid > b.who_paid) {
+            return 1
+        }
+        return 0
+    })
+}

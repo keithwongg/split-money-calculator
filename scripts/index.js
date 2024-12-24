@@ -84,6 +84,12 @@ function addWhoPaidForItemsLog() {
     renderSummary()
 }
 
+function removeItem(id) {
+    removeItemFromStorageById(id, ITEMS_KEY)
+    renderItemLogsInUi()
+    renderSummary()
+}
+
 function getWhoToSplitNamesFromUi() {
     let container = document.getElementById('inputSplitWith')
     let buttonNames = container.childNodes
