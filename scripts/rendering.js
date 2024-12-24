@@ -44,7 +44,7 @@ function renderDropdownOptions(names) {
     }
 }
 
-function renderLogsInUi() {
+function renderItemLogsInUi() {
     if (getFromLocalStorage(ITEMS_KEY) === undefined) {
         return
     }
@@ -116,6 +116,80 @@ function renderP2PLogsInUi() {
     }
 }
 
+function renderSummary() {
+    createAdjMatrix()
+    addItemCostsToAdjMatrix()
+    addP2PDataToAdjMatrix()
+
+    let namesArr = getFromLocalStorageAsArray(NAMES_KEY)
+    let adjMatrix = getFromLocalStorageAsArray(ADJMATRIX_KEY)
+    let pTagsToAdd = []
+
+    // check remaining balances
+    let allSettledUp = true
+    let settledUpDict = {}
+    for (let i = 0; i < namesArr.length; i++) {
+        settledUpDict[namesArr[i]] = 1 // set default as settled up
+        for (let j = 0; j < namesArr.length; j++) {
+            if (i === j) { // avoid if same person
+                continue
+            }
+            let owingValue = adjMatrix[i][j]
+            let receivingValue = adjMatrix[j][i]
+            if (owingValue > receivingValue) {
+                settledUpDict[namesArr[i]] = 0
+                allSettledUp = false
+                pTagsToAdd.push(createPTag(`${namesArr[i]} owes ${namesArr[j]} $${formatToShow2dpInUi(owingValue - receivingValue)}`))
+            } else if (receivingValue > owingValue) {
+                settledUpDict[namesArr[i]] = 0
+                allSettledUp = false
+                pTagsToAdd.push(createPTag(`${namesArr[i]} to receive $${formatToShow2dpInUi(receivingValue - owingValue)} from ${namesArr[j]}`))
+            }
+        }
+    }
+
+    if (allSettledUp) {
+        addPTagsToSummary([createPTag("All Settled Up! No Balance Remaining")])
+        showHappyCat(true)
+        return
+    }
+    showHappyCat(false)
+
+    for (const [key, value] of Object.entries(settledUpDict)) {
+        if (value === 1) {
+            pTagsToAdd.push(createPTag(`${key} is all settled up!`))
+        }
+    }
+    addPTagsToSummary(pTagsToAdd)
+}
+
+function createPTag(text) {
+    let pTag = document.createElement('p')
+    pTag.innerText = text
+    return pTag
+}
+
+function addPTagsToSummary(pTags) {
+    let summary = document.getElementById('balance-description')
+    summary.innerHTML = ''
+    for(let i = 0; i < pTags.length; i++) {
+        summary.appendChild(pTags[i])
+    }
+}
+
+function showHappyCat(show) {
+    // just for the lols
+    let cat = document.getElementById('happy-cat')
+    if (show) {
+        cat.classList.remove('hidden')
+        return
+    }
+    cat.classList.add('hidden')
+}
+
+/*
+    Others
+*/
 function sortItemsById(items) {
     items.sort(function(a, b) {
         return (a.id < b.id)

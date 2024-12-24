@@ -46,7 +46,7 @@ function delButtonForItemLogs(id) {
     let del = createDelButton()
     del.onclick = function () {
         removeItemFromStorageById(id, ITEMS_KEY)
-        renderLogsInUi()
+        renderItemLogsInUi()
         renderSummary()
     }
     return del

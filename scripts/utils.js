@@ -15,14 +15,33 @@ function getFromLocalStorageAsArray(key) {
     return itemsArr
 }
 
+function getIndexOfPersonByName(name) {
+    let namesArr = getFromLocalStorageAsArray(NAMES_KEY)
+    return namesArr.indexOf(name)
+}
+
 function saveInLocalStorage(key, content) {
     localStorage.setItem(key, JSON.stringify(content))
+}
+
+function removeItemFromStorageById(id, key) {
+    let items = getFromLocalStorage(key)
+    if (items === undefined) {
+        return;
+    }
+    let itemsArray = JSON.parse(items)
+    for (let i = 0; i < itemsArray.length; i++) {
+        if (itemsArray[i].id === id) {
+            itemsArray.splice(i, 1)
+        }
+    }
+    saveInLocalStorage(key, itemsArray)
+    return itemsArray
 }
 
 function clearAll() {
     localStorage.removeItem(NAMES_KEY)
     localStorage.removeItem(ITEMS_KEY)
-    localStorage.removeItem(BALANCE_KEY)
     localStorage.removeItem(P2P_KEY)
     location.reload()
 }
