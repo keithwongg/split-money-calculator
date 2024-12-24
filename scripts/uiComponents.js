@@ -47,7 +47,6 @@ function delButtonForItemLogs(id) {
     del.onclick = function () {
         removeItemFromStorageById(id, ITEMS_KEY)
         renderLogsInUi()
-        calculateBalance() // on delete need to add back the balance
         renderSummary()
     }
     return del
@@ -58,7 +57,6 @@ function delButtonForP2PLogs(id) {
     del.onclick = function () {
         removeItemFromStorageById(id, P2P_KEY)
         renderP2PLogsInUi()
-        calculateBalance() // on delete need to add back the balance
         renderSummary()
     }
     return del

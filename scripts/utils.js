@@ -30,3 +30,7 @@ function clearAll() {
 function roundToTwoDp(num) {
     return +(Math.round(num + "e+2")  + "e-2");
 }
+
+function formatToShow2dpInUi(num) {
+    return roundToTwoDp(num).toLocaleString("en-US", {maximumFractionDigits: 2, minimumFractionDigits: 2})
+}

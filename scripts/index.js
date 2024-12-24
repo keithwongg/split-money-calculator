@@ -2,6 +2,7 @@ const NAMES_KEY = "names";
 const ITEMS_KEY = "items";
 const BALANCE_KEY = "balance"; // this is the oweing balance
 const P2P_KEY = "p2p";
+const ADJMATRIX_KEY = "adjmatrix"; // this holds 2 matrix, for the balances
 
 /*
 schema:
@@ -46,8 +47,6 @@ final result as shown for person1
 
 window.onload = function (e) {
     renderNamesInUi()
-    createBalanceObj()
-    calculateBalance()
     renderLogsInUi()
     renderP2PLogsInUi()
     renderSummary()
@@ -61,7 +60,6 @@ function addName() {
     saveName(name.value)
     renderNamesInUi()
     name.value = ''
-    createBalanceObj()
 }
 
 /*
@@ -114,20 +112,15 @@ function addWhoPaidForItemsLog() {
     let item = {
         id: itemsArr.length + 1,
         description: description.value,
-        cost: cost.value,
+        cost: roundToTwoDp(cost.value),
         cost_per_pax: roundToTwoDp(cost.value/names.length),
         who_paid: whoPaid.value,
         to_receive_from: names
     }
     itemsArr.push(item)
-
     saveInLocalStorage(ITEMS_KEY, itemsArr)
-
-    createBalanceObj()
-    calculateBalance()
-    // renderWhoOweWhoLogsInUi()
-
     renderLogsInUi()
+    renderSummary()
 }
 
 function getWhoToSplitNamesFromUi() {
@@ -156,70 +149,57 @@ function removeItemFromStorageById(id, key) {
 }
 
 /*
-    Balance?
+    Adjacency Matrix
 */
-function calculateBalance() {
-    let itemsArr = getFromLocalStorageAsArray(ITEMS_KEY)
-    let p2pArr = getFromLocalStorageAsArray(P2P_KEY)
-    let balanceArr = getFromLocalStorageAsArray(BALANCE_KEY)
-    if (balanceArr.length <= 0) {
-        return
+function createAdjMatrix() {
+    let namesArr = getFromLocalStorageAsArray(NAMES_KEY)
+    // 0: x owes y, 1: y owes x
+    let adjMatrixes = []
+    for(let i = 0; i < namesArr.length; i++) {
+        adjMatrixes.push(Array(namesArr.length).fill(0))
     }
-
-    // who owe who
-    for(let i = 0; i < itemsArr.length; i++) {
-        let personToReceive = itemsArr[i].who_paid
-        let peopleWhoOwe = itemsArr[i].to_receive_from
-        // console.log(`people: ${personToReceive} ${peopleWhoOwe}`)
-
-        // for every person who owe, search for the balance arr, 
-        // find the r/s then add the amount
-        for (let j = 0; j < peopleWhoOwe.length; j++) {
-            balanceArr.forEach((bal) => {
-                let valueExist = bal[peopleWhoOwe[j]]
-                let oweAndPayNotTheSamePerson = personToReceive !== peopleWhoOwe[j]
-                if (valueExist && oweAndPayNotTheSamePerson) {
-                    bal[peopleWhoOwe[j]][personToReceive] = roundToTwoDp(bal[peopleWhoOwe[j]][personToReceive] + itemsArr[i].cost_per_pax)
-                }
-                // console.log(`${JSON.stringify(bal)}`)
-            })
-        }
-    }
-
-    // who paid who
-    for(let ii = 0; ii < p2pArr.length; ii++) {
-        let personToReceive = p2pArr[ii].recipient
-        let peopleWhoOwe = p2pArr[ii].payee
-        balanceArr.forEach((bal) => {
-            let valueExist = bal[peopleWhoOwe]
-            let oweAndPayNotTheSamePerson = personToReceive !== peopleWhoOwe
-            if (valueExist && oweAndPayNotTheSamePerson) {
-                bal[peopleWhoOwe][personToReceive] = roundToTwoDp(bal[peopleWhoOwe][personToReceive] - p2pArr[ii].cost)
-            }
-            // console.log(`${JSON.stringify(bal)}`)
-        })
-    }
-
-    saveInLocalStorage(BALANCE_KEY, balanceArr)
+    saveInLocalStorage(ADJMATRIX_KEY, adjMatrixes)
 }
 
-// establish the Payee Recipient Relationship
-function createBalanceObj() {
-    let namesArr = getFromLocalStorageAsArray(NAMES_KEY)
-    let overall = []
-    for(let i = 0; i < namesArr.length; i++) {
-        let pMap = {}
-        for(let j = 0; j < namesArr.length; j++) {
-            if (namesArr[j] === namesArr[i]) {
+function addItemCostsToAdjMatrix() {
+    let itemsArr = getFromLocalStorageAsArray(ITEMS_KEY)
+    let adjMatrix = getFromLocalStorageAsArray(ADJMATRIX_KEY)
+    for(let i = 0; i < itemsArr.length; i++) {
+        let idxPersonToReceive = getIndexOfPersonByName(itemsArr[i].who_paid)
+        if (idxPersonToReceive === -1) {
+            console.log('something wrong')
+            return
+        }
+        let peopleToReceiveFrom = itemsArr[i].to_receive_from
+        for (let j = 0; j < peopleToReceiveFrom.length; j++) {
+            let idxPersonOwe = getIndexOfPersonByName(peopleToReceiveFrom[j])
+            if (idxPersonOwe === idxPersonToReceive) { // skip if owing and paying person is the same
                 continue
             }
-            pMap[namesArr[j]] = 0
+            adjMatrix[idxPersonOwe][idxPersonToReceive] += itemsArr[i].cost_per_pax
         }
-        let obj = {}
-        obj[namesArr[i]] = pMap
-        overall.push(obj)
     }
-    saveInLocalStorage(BALANCE_KEY, overall)
+    saveInLocalStorage(ADJMATRIX_KEY, adjMatrix)
+}
+
+function addP2PDataToAdjMatrix() {
+    let p2pData = getFromLocalStorageAsArray(P2P_KEY)
+    let adjMatrix = getFromLocalStorageAsArray(ADJMATRIX_KEY)
+    for(let i = 0; i < p2pData.length; i++) {
+        let idxPersonWhoOwe = getIndexOfPersonByName(p2pData[i].payee)
+        let idxPersonToReceive = getIndexOfPersonByName(p2pData[i].recipient)
+        if (idxPersonWhoOwe === -1 || idxPersonToReceive === -1) {
+            console.log('something wrong')
+            return
+        }
+        adjMatrix[idxPersonWhoOwe][idxPersonToReceive] -= p2pData[i].cost
+    }
+    saveInLocalStorage(ADJMATRIX_KEY, adjMatrix)
+}
+
+function getIndexOfPersonByName(name) {
+    let namesArr = getFromLocalStorageAsArray(NAMES_KEY)
+    return namesArr.indexOf(name)
 }
 
 /*
@@ -240,46 +220,57 @@ function whoPayWhoAddLog() {
         id: p2pData.length + 1,
         payee: payee.value,
         recipient: recipient.value,
-        cost: cost.value
+        cost: roundToTwoDp(cost.value)
     }
     p2pData.push(item)
     saveInLocalStorage(P2P_KEY, p2pData)
     renderP2PLogsInUi()
-
-    createBalanceObj()
-    calculateBalance()
     renderSummary()
 }
 
 function renderSummary() {
+    createAdjMatrix()
+    addItemCostsToAdjMatrix()
+    addP2PDataToAdjMatrix()
+
     let namesArr = getFromLocalStorageAsArray(NAMES_KEY)
-    let balanceArr = getFromLocalStorageAsArray(BALANCE_KEY)
+    let adjMatrix = getFromLocalStorageAsArray(ADJMATRIX_KEY)
     let pTagsToAdd = []
 
+    // check remaining balances
+    let allSettledUp = true
+    let settledUpDict = {}
     for (let i = 0; i < namesArr.length; i++) {
-        // iterate through all the balances and get all the data
-        let personToFocusOn = namesArr[i]
-        // console.log(`persontofocuson: ${personToFocusOn}`)
-        for (let j = 0; j < balanceArr.length; j++) {
-            if (balanceArr[j][personToFocusOn]) {
-                let owingToPeople = balanceArr[j][personToFocusOn]
-                // console.log(`monkeyowing: ${JSON.stringify(owingToPeople)}`)
-
-                // show owing money
-                for (const [key, value] of Object.entries(owingToPeople)) {
-                    if (value !== 0) {
-                        pTagsToAdd.push(createPTag(`${personToFocusOn} Owes ${key} $${value}`))
-                    }
-                }
+        settledUpDict[namesArr[i]] = 1 // set default as settled up
+        for (let j = 0; j < namesArr.length; j++) {
+            if (i === j) { // avoid if same person
+                continue
+            }
+            let owingValue = adjMatrix[i][j]
+            let receivingValue = adjMatrix[j][i]
+            if (owingValue > receivingValue) {
+                settledUpDict[namesArr[i]] = 0
+                allSettledUp = false
+                pTagsToAdd.push(createPTag(`${namesArr[i]} owes ${namesArr[j]} $${formatToShow2dpInUi(owingValue - receivingValue)}`))
+            } else if (receivingValue > owingValue) {
+                settledUpDict[namesArr[i]] = 0
+                allSettledUp = false
+                pTagsToAdd.push(createPTag(`${namesArr[i]} to receive $${formatToShow2dpInUi(receivingValue - owingValue)} from ${namesArr[j]}`))
             }
         }
     }
 
-    if (pTagsToAdd.length <= 0) {
+    if (allSettledUp) {
         addPTagsToSummary([createPTag("All Settled Up! No Balance Remaining")])
-    } else {
-        addPTagsToSummary(pTagsToAdd)
+        return
     }
+
+    for (const [key, value] of Object.entries(settledUpDict)) {
+        if (value === 1) {
+            pTagsToAdd.push(createPTag(`${key} is all settled up!`))
+        }
+    }
+    addPTagsToSummary(pTagsToAdd)
 }
 
 function createPTag(text) {
