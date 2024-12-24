@@ -57,7 +57,7 @@ function renderItemLogsInUi() {
     cardContainer.innerHTML = ''
     for(let i = 0; i < items.length; i++) {
         let card = document.createElement('div')
-        card.classList.add("p-2", "flex", "items-center", "justify-between", "w-full", "h-full", "border-2", "border-black","rounded-md","shadow-sm", "bg-slate-50")
+        card.classList.add("my-2", "p-2", "flex", "items-center", "justify-between", "w-full", "h-full", "border-2", "border-black","rounded-md","shadow-sm", "bg-slate-50")
         let cardHtml = `
         <div class="flex-col flex-wrap">
             <div class="font-bold">${items[i].description}</div>
@@ -81,28 +81,21 @@ function renderP2PLogsInUi() {
     let items = JSON.parse(getFromLocalStorage(P2P_KEY))
     // sortItemsById(items)
 
-    let table = document.getElementById('p2p-trf')
-    table.innerHTML = ''
+    let cardContainer = document.getElementById('p2p-card-container')
+    cardContainer.innerHTML = ''
     for(let i = 0; i < items.length; i++) {
-        let entryRow = document.createElement('tr')
-        entryRow.value = i
-
-        let payee = document.createElement('td')
-        payee.innerText = items[i].payee
-        entryRow.appendChild(payee)
-
-        let recipient = document.createElement('td')
-        recipient.innerText = items[i].recipient
-        entryRow.appendChild(recipient)
-
-        let cost = document.createElement('td')
-        cost.innerText = items[i].cost
-        entryRow.appendChild(cost)
-
+        let card = document.createElement('div')
+        card.classList.add("my-2", "p-2", "flex", "items-center", "justify-between", "w-full", "h-full", "border-2", "border-black","rounded-md","shadow-sm", "bg-slate-50")
+        let cardHtml = `
+        <div class="flex-col flex-wrap my-2">
+            <div>${items[i].payee} => ${items[i].recipient}</div>
+            <div class="font-bold">Cost: $${items[i].cost}</div>
+        </div>
+        `
+        card.innerHTML += cardHtml
         let delButton = delButtonForP2PLogs(items[i].id)
-        entryRow.appendChild(delButton)
-
-        table.appendChild(entryRow)
+        card.appendChild(delButton)
+        cardContainer.appendChild(card)
     }
 }
 

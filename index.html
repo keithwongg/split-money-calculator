@@ -56,7 +56,7 @@
             <label>Who to split with:</label>
             <button class="rounded-md bg-indigo-100 px-2" onclick="splitWithAll()">Click To Load All Names</button><br><br>
             <div id="inputSplitWith"></div>
-            <button class="rounded-md bg-blue-100 px-2 mt-6 mb-6" onclick="addWhoPaidForItemsLog()">Add Log Entry</button>
+            <button class="rounded-md bg-blue-100 px-2 my-6" onclick="addWhoPaidForItemsLog()">Add Log Entry</button>
         </div>
 
         <div class="flex-col flex-wrap" id="logs-card-container"></div>
@@ -81,22 +81,11 @@
             <label for="fwpwcost">$$ Paid:</label>
             <input class="border-2 border-black mr-2 px-2" type="number" id="who-pay-who-cost" name="fwpwcost"><br><br>
             <p class="text-red-900 mb-2 hidden" id="error-who-paid-who">Cannot be the same person - Cannot pay yourself</p>
-            <button class="rounded-md bg-blue-100 px-2" onclick="whoPayWhoAddLog()">Add Log Entry</button>
+            <button class="rounded-md bg-blue-100 px-2 mb-6" onclick="whoPayWhoAddLog()">Add Log Entry</button>
         </div>
 
-        <div>
-            <table>
-                <tbody>
-                    <tr>
-                        <th>Payee</th>
-                        <th>Recipient</th>
-                        <th>Cost</th>
-                    </tr>
-                </tbody>
-                <tbody id="p2p-trf">
-                </tbody>
-            </table>
-        </div>
+        <div class="flex-col flex-wrap" id="p2p-card-container"></div>
+
     </section>
 
     <div class="split-border"></div>
