@@ -58,17 +58,22 @@ function renderItemLogsInUi() {
     let cardContainer = document.getElementById('logs-card-container')
     cardContainer.innerHTML = ''
     for(let i = 0; i < items.length; i++) {
+        let card = document.createElement('div')
+        card.classList.add("p-2", "flex", "items-center", "justify-between", "w-full", "h-full", "border-2", "border-black","rounded-md","shadow-sm", "bg-slate-50")
         let cardHtml = `
-        <div class="p-2 flex items-center justify-between w-full h-full border-2 border-black rounded-md shadow-sm bg-slate-50">
-            <div class="flex-col flex-wrap">
-                <div>${items[i].who_paid} paid for ${items[i].description}</div>
-                <div>Total Cost: $${items[i].cost}</div>
-                <div>Cost Per Pax: $${items[i].cost_per_pax}</div>
-                <div>Split Between: ${items[i].to_receive_from}</div>
-            </div>
-            ${delButtonForItemLogs(items[i].id).outerHTML}
+        <div class="flex-col flex-wrap">
+            <div class="font-bold">${items[i].description}</div>
+            <div>Paid By: ${items[i].who_paid}</div>
+            <div>Total Cost: $${items[i].cost}</div>
+            <div class="font-bold">Cost Per Pax: $${items[i].cost_per_pax}</div>
+            <div>Split Between: ${items[i].to_receive_from}</div>
         </div>
         `
+        card.innerHTML += cardHtml
+        let delButton = delButtonForItemLogs(items[i].id)
+        card.appendChild(delButton)
+        cardContainer.appendChild(card)
+
 
         // let entryRow = document.createElement('tr')
         // entryRow.value = i
@@ -98,7 +103,6 @@ function renderItemLogsInUi() {
 
         // table.appendChild(entryRow)
 
-        cardContainer.innerHTML += cardHtml
     }
 }
 
