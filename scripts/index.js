@@ -47,7 +47,7 @@ final result as shown for person1
 window.onload = function (e) {
     renderNamesInUi()
     createBalanceObj()
-    calculateWhoOweWhoInBalance()
+    calculateBalance()
     renderLogsInUi()
     renderP2PLogsInUi()
     renderSummary()
@@ -124,7 +124,8 @@ function addWhoPaidForItemsLog() {
     saveInLocalStorage(ITEMS_KEY, itemsArr)
 
     createBalanceObj()
-    calculateWhoOweWhoInBalance()
+    calculateBalance()
+    // renderWhoOweWhoLogsInUi()
 
     renderLogsInUi()
 }
@@ -155,12 +156,17 @@ function removeItemFromStorageById(id, key) {
 }
 
 /*
-    Who Owe Who?
+    Balance?
 */
-function calculateWhoOweWhoInBalance() {
+function calculateBalance() {
     let itemsArr = getFromLocalStorageAsArray(ITEMS_KEY)
+    let p2pArr = getFromLocalStorageAsArray(P2P_KEY)
     let balanceArr = getFromLocalStorageAsArray(BALANCE_KEY)
+    if (balanceArr.length <= 0) {
+        return
+    }
 
+    // who owe who
     for(let i = 0; i < itemsArr.length; i++) {
         let personToReceive = itemsArr[i].who_paid
         let peopleWhoOwe = itemsArr[i].to_receive_from
@@ -173,11 +179,25 @@ function calculateWhoOweWhoInBalance() {
                 let valueExist = bal[peopleWhoOwe[j]]
                 let oweAndPayNotTheSamePerson = personToReceive !== peopleWhoOwe[j]
                 if (valueExist && oweAndPayNotTheSamePerson) {
-                    bal[peopleWhoOwe[j]][personToReceive] += itemsArr[i].cost_per_pax
+                    bal[peopleWhoOwe[j]][personToReceive] = roundToTwoDp(bal[peopleWhoOwe[j]][personToReceive] + itemsArr[i].cost_per_pax)
                 }
                 // console.log(`${JSON.stringify(bal)}`)
             })
         }
+    }
+
+    // who paid who
+    for(let ii = 0; ii < p2pArr.length; ii++) {
+        let personToReceive = p2pArr[ii].recipient
+        let peopleWhoOwe = p2pArr[ii].payee
+        balanceArr.forEach((bal) => {
+            let valueExist = bal[peopleWhoOwe]
+            let oweAndPayNotTheSamePerson = personToReceive !== peopleWhoOwe
+            if (valueExist && oweAndPayNotTheSamePerson) {
+                bal[peopleWhoOwe][personToReceive] = roundToTwoDp(bal[peopleWhoOwe][personToReceive] - p2pArr[ii].cost)
+            }
+            // console.log(`${JSON.stringify(bal)}`)
+        })
     }
 
     saveInLocalStorage(BALANCE_KEY, balanceArr)
@@ -223,11 +243,11 @@ function whoPayWhoAddLog() {
         cost: cost.value
     }
     p2pData.push(item)
-
     saveInLocalStorage(P2P_KEY, p2pData)
-
     renderP2PLogsInUi()
 
+    createBalanceObj()
+    calculateBalance()
     renderSummary()
 }
 

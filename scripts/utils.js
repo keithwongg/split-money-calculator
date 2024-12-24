@@ -22,6 +22,8 @@ function saveInLocalStorage(key, content) {
 function clearAll() {
     localStorage.removeItem(NAMES_KEY)
     localStorage.removeItem(ITEMS_KEY)
+    localStorage.removeItem(BALANCE_KEY)
+    localStorage.removeItem(P2P_KEY)
     location.reload()
 }
 
