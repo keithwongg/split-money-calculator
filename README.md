@@ -59,3 +59,4 @@ abs(3 - 10) = 7
 - table styling
 - save screenshot - do an exported img of the important details:
   - who paid for what, who paid who + summary
+- add on event enter - create new log / add

@@ -5,6 +5,8 @@ const ADJMATRIX_KEY = "adjmatrix"; // this holds 2 matrix, for the balances
 
 
 window.onload = function (e) {
+    setEventListeners()
+
     renderNamesInUi()
     renderItemLogsInUi()
     renderP2PLogsInUi()
@@ -147,7 +149,7 @@ function addItemCostsToAdjMatrix() {
             if (idxPersonOwe === idxPersonToReceive) { // skip if owing and paying person is the same
                 continue
             }
-            adjMatrix[idxPersonOwe][idxPersonToReceive] += itemsArr[i].cost_per_pax
+            adjMatrix[idxPersonOwe][idxPersonToReceive] =  roundToTwoDp(adjMatrix[idxPersonOwe][idxPersonToReceive] + itemsArr[i].cost_per_pax)
         }
     }
     saveInLocalStorage(ADJMATRIX_KEY, adjMatrix)
@@ -163,7 +165,7 @@ function addP2PDataToAdjMatrix() {
             console.log('something wrong')
             return
         }
-        adjMatrix[idxPersonWhoOwe][idxPersonToReceive] -= p2pData[i].cost
+        adjMatrix[idxPersonWhoOwe][idxPersonToReceive] = roundToTwoDp(adjMatrix[idxPersonWhoOwe][idxPersonToReceive] - p2pData[i].cost)
     }
     saveInLocalStorage(ADJMATRIX_KEY, adjMatrix)
 }

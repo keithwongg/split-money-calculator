@@ -121,45 +121,107 @@ function renderSummary() {
     addItemCostsToAdjMatrix()
     addP2PDataToAdjMatrix()
 
+    let itemsLength = getFromLocalStorageAsArray(ITEMS_KEY).length
+    let p2pLength = getFromLocalStorageAsArray(ITEMS_KEY).length
     let namesArr = getFromLocalStorageAsArray(NAMES_KEY)
     let adjMatrix = getFromLocalStorageAsArray(ADJMATRIX_KEY)
     let pTagsToAdd = []
 
-    // check remaining balances
-    let allSettledUp = true
     let settledUpDict = {}
     for (let i = 0; i < namesArr.length; i++) {
-        settledUpDict[namesArr[i]] = 1 // set default as settled up
+        settledUpDict[namesArr[i]] = 1 // default to false
         for (let j = 0; j < namesArr.length; j++) {
             if (i === j) { // avoid if same person
                 continue
             }
+
             let owingValue = adjMatrix[i][j]
             let receivingValue = adjMatrix[j][i]
-            if (owingValue > receivingValue) {
-                settledUpDict[namesArr[i]] = 0
-                allSettledUp = false
-                pTagsToAdd.push(createPTag(`${namesArr[i]} owes ${namesArr[j]} $${formatToShow2dpInUi(owingValue - receivingValue)}`))
-            } else if (receivingValue > owingValue) {
-                settledUpDict[namesArr[i]] = 0
-                allSettledUp = false
-                pTagsToAdd.push(createPTag(`${namesArr[i]} to receive $${formatToShow2dpInUi(receivingValue - owingValue)} from ${namesArr[j]}`))
+
+            /*
+             2D Matrix of possibilities:
+                    o
+                  |      +           |        -        |
+             r  + | owe +, receive + | owe -, receive +|
+                - | owe +, receive - | owe -, receive -|
+            */
+            if (owingValue === receivingValue) {
+                settledUpDict[namesArr[i]] = 1
+                continue
             }
+            settledUpDict[namesArr[i]] = 0
+
+            // o+r+
+            if (owingValue >= 0 && receivingValue >= 0) {
+                if (owingValue > receivingValue) {
+                    pTagsToAdd.push(createPTag(`${namesArr[i]} owes ${namesArr[j]} $${formatToShow2dpInUi(owingValue - receivingValue)}`))
+                } else if (receivingValue > owingValue) {
+                    pTagsToAdd.push(createPTag(`${namesArr[i]} to receive $${formatToShow2dpInUi(receivingValue - owingValue)} from ${namesArr[j]}`))
+                }
+                continue
+            }
+
+            // o+r-
+            if (owingValue >= 0 && receivingValue < 0) {
+                let valueAfterContra = Math.abs(receivingValue - owingValue)
+                pTagsToAdd.push(createPTag(`${namesArr[i]} owes ${namesArr[j]} $${formatToShow2dpInUi(valueAfterContra)}`))
+                continue
+            }
+
+            // o-r+
+            if (owingValue < 0 && receivingValue >= 0) {
+                pTagsToAdd.push(createPTag(`${namesArr[i]} overpaid ${namesArr[j]} $${formatToShow2dpInUi(Math.abs(owingValue))}`))
+                continue
+            }
+
+            // o-r-
+            if (receivingValue < 0 && owingValue < 0) {
+                if (receivingValue < owingValue) {
+                    let valueAfterContra = Math.abs(receivingValue - owingValue)
+                    pTagsToAdd.push(createPTag(`${namesArr[i]} owes ${namesArr[j]} $${formatToShow2dpInUi(Math.abs(valueAfterContra))}`))
+                } else if (owingValue > receivingValue) {
+                    let valueAfterContra = Math.abs(owingValue - receivingValue)
+                    pTagsToAdd.push(createPTag(`${namesArr[i]} overpaid ${namesArr[j]} $${formatToShow2dpInUi(Math.abs(valueAfterContra))}`))
+                }
+                continue
+            }
+
+            // if (owingValue < 0) {
+            //     settledUpDict[namesArr[i]] = 0
+            //     pTagsToAdd.push(createPTag(`${namesArr[i]} overpaid $${formatToShow2dpInUi(Math.abs(owingValue))} to ${namesArr[j]}`))
+            // } else if (owingValue > receivingValue) {
+            //     settledUpDict[namesArr[i]] = 0
+            //     pTagsToAdd.push(createPTag(`${namesArr[i]} owes ${namesArr[j]} $${formatToShow2dpInUi(owingValue - receivingValue)}`))
+            // } else if (receivingValue > owingValue) {
+            //     settledUpDict[namesArr[i]] = 0
+            //     pTagsToAdd.push(createPTag(`${namesArr[i]} to receive $${formatToShow2dpInUi(receivingValue - owingValue)} from ${namesArr[j]}`))
+            // }
+            // // check for overpayment - i.e. -negative values
         }
     }
 
-    if (allSettledUp) {
+    let allSettledUp = true
+    console.log(`settledupdict: ${JSON.stringify(settledUpDict)}`)
+    for (const [key, value] of Object.entries(settledUpDict)) {
+        if (value === 1) {
+            pTagsToAdd.push(createPTag(`${key} is all settled up!`))
+        } else {
+            allSettledUp = false
+        }
+    }
+
+    let incompleteProgress = itemsLength === 0 ||
+        p2pLength === 0 ||
+        namesArr.length === 0 ||
+        adjMatrix.length === 0
+
+    if (allSettledUp && !incompleteProgress) {
         addPTagsToSummary([createPTag("All Settled Up! No Balance Remaining")])
         showHappyCat(true)
         return
     }
-    showHappyCat(false)
 
-    for (const [key, value] of Object.entries(settledUpDict)) {
-        if (value === 1) {
-            pTagsToAdd.push(createPTag(`${key} is all settled up!`))
-        }
-    }
+    showHappyCat(false)
     addPTagsToSummary(pTagsToAdd)
 }
 
