@@ -1,27 +1,25 @@
-# split-money-calculator
-like a splitwise app - budget dumb down version without data persistence
+# Simple Split
+Fully local, data stored in browser, one-page simple split calculator.
 
 
-todo:
-- add logging for items - take from local storage
-- finish up the who paid who structure
-- think about datastructure for the calculation and tabulation logic | need to include the offsetting logic
-- add import/export functionality - out to json and back into local storage
+## Data Schemas
 
-- add section to say: who should pay who and what is left for the total up balance.
+names: ["person 1", "person 2"]
 
-- if delete people involved, all data related to the person will have to be removed.
- -> need to show pop-up notification + design that.
+items: [{
+    description: "item1",
+    cost: "20",
+    who_paid: "person 1",
+    to_receive_from: ["person 1", "person 2"]
+}]
 
-- might need to fix the id thingy
+p2p: [{
+    payee: "person 1",
+    recipient: "person 2",
+    cost: "10"
+}]
 
-
-- need to create a 'contra' feature to net off the pay and receive
-- need to handle overpayment ?
-- who paid who feature not done
-- who owe who summary under who paid for items - logs not rendered
-
-# Adjacency Matrix
+## Adjacency Matrix
 
 Use this to track and tally up balances.
 
@@ -49,3 +47,15 @@ do this by taking the difference and applying absolute to it (remove negative)
 abs(10 - 3) = 7
 the other way also works:
 abs(3 - 10) = 7
+
+
+## To-Dos:
+- add logging for items - take from local storage
+- add import/export functionality - out to json and back into local storage
+- if delete people involved, all data related to the person will have to be removed.
+ -> need to show pop-up notification + design that.
+- might need to fix the id thingy
+- test for breaking changes if user does not use the app linearly (jump between sections)
+- table styling
+- save screenshot - do an exported img of the important details:
+  - who paid for what, who paid who + summary

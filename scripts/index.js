@@ -4,46 +4,6 @@ const BALANCE_KEY = "balance"; // this is the oweing balance
 const P2P_KEY = "p2p";
 const ADJMATRIX_KEY = "adjmatrix"; // this holds 2 matrix, for the balances
 
-/*
-schema:
-
-names: ["person 1", "person 2"]
-
-items: [{
-    description: "item1",
-    cost: "20",
-    who_paid: "person 1",
-    to_receive_from: ["person 1", "person 2"]
-}]
-
-p2p: [{
-    payee: "person 1",
-    recipient: "person 2",
-    cost: "10"
-}]
-
-figure represents oweing
-owe_balance: [{
-    "person 1" : {
-        "person 2": 0,
-        "person 3": 0
-    },
-    "person 2" : {
-        "person 1": 30,
-        "person 4": 0
-    }
-}]
-
-counter: 0
-person 1 - person 2: 0
-person 2 - person 1: -3)
-
-how to know balance of person 1:
-store person1's data that he owe to ppl:
-for each person that is not person1 data, owe to person 1, + $$ to person1 r/s
-
-final result as shown for person1
-*/
 
 window.onload = function (e) {
     renderNamesInUi()
